@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="estilos.css"> 
+      
+    <title>Validador</title>
+</head>
+<body>
+
+
+<!--1er consumo de la API a traves del metodo POST-->
+<script>
+var myHeaders = new Headers();
+myHeaders.append("API-Key", "Valor API-Key");
+myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
+
+var urlencoded = new URLSearchParams();
+urlencoded.append("type", "document-validation");
+urlencoded.append("country", "CO");
+urlencoded.append("document_type", "national-id");
+urlencoded.append("user_authorized", "true");
+
+var requestOptions = {
+  method: 'POST',
+  headers: myHeaders,
+  body: urlencoded,
+  redirect: 'follow'
+
+};
+
+var URLfrente;
+var URLreverso;
+var validationid;
+
+fetch("Endpoint", requestOptions)
+    .then(response => response.json())
+    .then(result => { URLfrente = result.instructions.front_url; URLreverso = result.instructions.front_url; validationid = result.validation_id;console.log(URLfrente);console.log(URLreverso);console.log(validationid)
+    }).catch(error => console.log('error', error));
+
+</script>
+
+<!--Input para guardar la imagen frontal y reversa dentro de las varibles foto y foto2-->
+<br><br><br><br><br>
+<form>
+    <div class ="formulario">
+    <label for="foto">Frente del documento</label>
+    <input  type="file" id="foto" name="foto" accept=“image/jpeg,image/png,image/jpg” onchange="guardarFoto()"><br><br>
+
+    <label for="foto2">Reverso del documento</label>
+    <input type="file" id="foto2" name="foto2" accept=“image/jpeg,image/png,image/jpg” onchange="guardarFoto2()"><br><br>
+    </div>
+<script>
+var foto;
+    function guardarFoto() {
+        var input = document.getElementById("foto");
+        foto = input.files[0];
+        console.log(foto.name + " (" + foto.size + " bytes)");
+    }
+var foto2;
+    function guardarFoto2() {
+        var input = document.getElementById("foto2");
+        foto2 = input.files[0];
+        console.log(foto2.name + " (" + foto2.size + " bytes)");
+    }
+</script>
+
+<!--2do y 3er consumo de la API a traves del metodo PUT el cual envia las dos imagenes a traves del metodo PUT-->
+</form><br>
+<form>
+    <label for="foto"></label>
+    <button class = "button" type= "button" onclick="Cargarfoto();Cargarfoto2()">1. Cargar las imagenes</button><br>
+</div>
+
+<script>
+    function Cargarfoto(){
+        var myHeaders1 = new Headers();
+        myHeaders1.append("Content-Type", "image/jpeg,image/png,image/jpg");
+
+        var requestOptions1 = {
+        method: 'PUT',
+        headers: myHeaders1,
+        body: foto,
+        redirect: 'follow'
+        };
+
+    fetch(URLfrente, requestOptions1)
+    .then(response1 => response1.text())
+    .then(result1 => console.log(result1))
+    .catch(error1 => console.log('error', error1));
+    
+    }
+
+    function Cargarfoto2(){
+        var myHeaders2 = new Headers();
+        myHeaders2.append("Content-Type", "image/jpeg,image/png,image/jpg");
+
+        var requestOptions2 = {
+        method: 'PUT',
+        headers: myHeaders2,
+        body: foto2,
+        redirect: 'follow'
+        };
+
+    fetch(URLreverso, requestOptions2)
+    .then(response2 => response2.text())
+    .then(result2 => console.log(result2))
+    .catch(error2 => console.log('error', error2));}
+</script>
+
+<!--4to consumo de la API a traves de GET con el fin de obtener el accountid-->
+    <label for="Validacion"></label>
+    <button class = "button" type= "button" onclick="obtenervalidacion()">2. Validar el documento cargado</button>
+</form><br>
+
+<script>
+    var estado; 
+    var resultado;
+    function obtenervalidacion(){
+        var myHeaders3 = new Headers();
+        myHeaders3.append("API-Key", "Valor API-Key");
+        var requestOptions3 = {
+        method: 'GET',
+        headers: myHeaders3,
+        redirect: 'follow'
+    };
+
+    fetch(("Endpoint/" + validationid), requestOptions3)
+    .then(response3 => response3.json())
+    .then(result3 => {
+    estado = result3.validation_status;resultado = result3;var elementoEstado = document.getElementById("estado");var elementoResultado = document.getElementById("resultado");elementoEstado.innerHTML = estado;elementoResultado.innerHTML = JSON.stringify(resultado);})
+    .catch(error3 => console.log('error', error3));
+    }
+</script>
+
+</body>
+<div class = "estadodiv" id = "estado">El estado de la validacion es</div><br>
+<div class = "rersultadodiv" id = "resultado">El resultdo completo en formato Json</div> 
+
+</html>
